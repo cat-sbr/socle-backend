@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-public  class Commune implements Serializable {
+public class Commune implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

@@ -90,6 +90,49 @@ private Maire maire;
 Une relation bidirectionnelle ne crée pas une colonne dans la table parent (commune) vers la table enfant (maire). 
 Lorsque l'on veut lire la relation retour, à partir de l'entité parent (Commune), une requête est lancée sur la base, en utilisant le caractère bidirectionnel de la relation.
 
+#### fetch
+
+* FetchType.LAZY : indique que la relation doit être chargée à la demande ; 
+* FetchType.EAGER : indique que la relation doit être chargée en même temps que l'entité qui la porte.
+
+```
+@OneToOne
+private Commune commune;
+```
+Le comportement par défaut est EAGER :
+```
+    select
+        maire0_.id as id1_1_0_,
+        maire0_.commune_id as commune_3_1_0_,
+        maire0_.nom as nom2_1_0_,
+        commune1_.id as id1_0_1_,
+        commune1_.nom as nom2_0_1_ 
+    from
+        maire maire0_ 
+    left outer join
+        commune commune1_ 
+            on maire0_.commune_id=commune1_.id 
+    where
+        maire0_.id=?
+```
+
+Avec FetchType.LAZY :
+```
+@OneToOne(fetch = FetchType.LAZY)
+private Commune commune;
+```
+On obtient ce select :
+```
+    select
+        maire0_.id as id1_1_0_,
+        maire0_.commune_id as commune_3_1_0_,
+        maire0_.nom as nom2_1_0_ 
+    from
+        maire maire0_ 
+    where
+        maire0_.id=?
+```
+
 #### préconisations relation 1:1
 
 TODO : explorer https://vladmihalcea.com/the-best-way-to-map-a-onetoone-relationship-with-jpa-and-hibernate/ et tester des inserts...
