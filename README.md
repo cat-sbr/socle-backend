@@ -135,7 +135,7 @@ On obtient ce select :
         maire0_.id=?
 ```
 
-#### cascade
+#### cascade - [branches des sources](https://github.com/cat-sbr/socle-backend/tree/OneToOne_bidirectionnel_cascade)
 
 Le entityManager permet d'effectuer les opération suivantes sur une entité : DETACH, MERGE, PERSIST, REMOVE, REFRESH.
 Le comportement cascade consiste à spécifier ce qui se passe pour une entité (Maire) en relation avec une entité parent (Commune),
