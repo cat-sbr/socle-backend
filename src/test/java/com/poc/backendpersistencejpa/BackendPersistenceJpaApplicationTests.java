@@ -20,28 +20,21 @@ class BackendPersistenceJpaApplicationTests {
 
 	@Test
 	@Transactional
-	void simpleTest() {
+	void whenParentSavedThenChildSaved() {
 
 		/*
 		INSERTS
 		 */
 		Commune niort = new Commune();
 		niort.setNom("Niort");
-		/* merge returns the managed instance that the state was merged to. */
-		niort = entityManager.merge(niort);
-
 		Maire pierre = new Maire();
 		pierre.setNom("Pierre");
+		niort.setMaire(pierre);
 		pierre.setCommune(niort);
-		entityManager.persist(pierre);
+		entityManager.persist(niort);
 		entityManager.flush();
-
-		/*
-		SELECTS
-		 */
 		entityManager.clear();
-		Maire maire = entityManager.find(Maire.class, pierre.getId());
-		System.out.println(maire.getId());
+
 	}
 
 }

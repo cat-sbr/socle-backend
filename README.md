@@ -8,6 +8,8 @@ https://www.baeldung.com/jpa-one-to-one
 
 https://vladmihalcea.com/the-best-way-to-map-a-onetoone-relationship-with-jpa-and-hibernate/
 
+https://www.baeldung.com/jpa-cascade-types
+
 ## Postgres
 
 Les diagrammes de tables sont générés avec pgAdmin ERD Tool.
@@ -79,7 +81,7 @@ DETAIL:  Key (commune_id)=(1) already exists.
 SQL state: 23505
 ```
 
-#### Cas bidirectionnel
+#### Cas bidirectionnel - [branche des sources](https://github.com/cat-sbr/socle-backend/tree/OneToOne_bidirectionnel)
 
 Ajouter une référence à l'entité Maire dans la classe Commune **ne change rien au SQL généré**
 ```
@@ -90,7 +92,7 @@ private Maire maire;
 Une relation bidirectionnelle ne crée pas une colonne dans la table parent (commune) vers la table enfant (maire). 
 Lorsque l'on veut lire la relation retour, à partir de l'entité parent (Commune), une requête est lancée sur la base, en utilisant le caractère bidirectionnel de la relation.
 
-#### fetch
+#### fetch - [branches des sources](https://github.com/cat-sbr/socle-backend/tree/OneToOne_bidirectionnel_fetch)
 
 * FetchType.LAZY : indique que la relation doit être chargée à la demande ; 
 * FetchType.EAGER : indique que la relation doit être chargée en même temps que l'entité qui la porte.
@@ -131,6 +133,46 @@ On obtient ce select :
         maire maire0_ 
     where
         maire0_.id=?
+```
+
+#### cascade
+
+Le entityManager permet d'effectuer les opération suivantes sur une entité : DETACH, MERGE, PERSIST, REMOVE, REFRESH.
+Le comportement cascade consiste à spécifier ce qui se passe pour une entité (Maire) en relation avec une entité parent (Commune),
+lorsque cette entité parent (Commune) subit une des 5 opérations ci-dessus.
+
+Sans la Commune, l'entité Maire n'a pas de sens. Lorsqu'on supprime l'entité Commune, l'entité Maire doit aussi être supprimée.
+
+Que se passe-t-il pour l'entité Maire, lorsqu'on persiste son entité parent Commune ?
+
+Avec le TU whenParentSavedThenChildSaved(), si on laisse la référence telle quelle :
+```
+@OneToOne(mappedBy="commune")
+private Maire maire;
+```
+On obtient l'erreur :
+> object references an unsaved transient instance - save the transient instance before flushing : com.poc.backendpersistencejpa.entities.Commune.maire
+
+Avec l'attribut cascade :
+```
+@OneToOne(mappedBy="commune", cascade = CascadeType.ALL)
+private Maire maire;
+```
+On obtient ces inserts :
+```
+    insert 
+    into
+        commune
+        (nom, id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        maire
+        (commune_id, nom, id) 
+    values
+        (?, ?, ?)
 ```
 
 #### préconisations relation 1:1
