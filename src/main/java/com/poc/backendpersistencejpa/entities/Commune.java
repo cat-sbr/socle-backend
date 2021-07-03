@@ -4,17 +4,17 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-public  class Commune  implements Serializable {
+public  class Commune implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(length=40)
-    private String nom ;
+    private String nom;
 
-    @OneToOne
-    private Maire maire ;
+    @OneToOne(mappedBy="commune")  // référence la relation dans la classe Maire
+    private Maire maire;
 
     public Long getId() {
         return id;

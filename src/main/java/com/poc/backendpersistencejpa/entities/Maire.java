@@ -11,7 +11,10 @@ public  class Maire  implements Serializable {
     private Long id;
 
     @Column(length=40)
-    private String nom ;
+    private String nom;
+
+    @OneToOne
+    private Commune commune;
 
     public Long getId() {
         return id;
@@ -27,5 +30,13 @@ public  class Maire  implements Serializable {
 
     public void setNom(String nom) {
         this.nom = nom;
+    }
+
+    public Commune getCommune() {
+        return commune;
+    }
+
+    public void setCommune(Commune commune) {
+        this.commune = commune;
     }
 }
