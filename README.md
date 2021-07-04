@@ -218,7 +218,98 @@ Hibernate:
 
 #### préconisation vladmihalcea
 
-https://vladmihalcea.com/the-best-way-to-map-a-onetoone-relationship-with-jpa-and-hibernate/ et tester des inserts...
+[https://vladmihalcea.com/the-best-way-to-map-a-onetoone-relationship-with-jpa-and-hibernate/](https://vladmihalcea.com/the-best-way-to-map-a-onetoone-relationship-with-jpa-and-hibernate/)
+
+Rappel du schema actuel :
+
+![actuel](./doc/un-un-unidir-v1.png?raw=true)
+
+Avec cette référence dans Commune.java :
+```
+@OneToOne(mappedBy="commune", cascade=CascadeType.ALL, fetch=FetchType.LAZY, optional=false)
+private Maire maire;
+```
+Lorsqu'on lit une Commune :
+```
+Commune commune = entityManager.find(Commune.class, niort.getId());
+```
+Hibernate déclenche 2 select :
+```
+    select
+        commune0_.id as id1_0_0_,
+        commune0_.nom as nom2_0_0_ 
+    from
+        commune commune0_ 
+    where
+        commune0_.id=?
+
+    select
+        maire0_.id as id1_1_0_,
+        maire0_.commune_id as commune_3_1_0_,
+        maire0_.nom as nom2_1_0_ 
+    from
+        maire maire0_ 
+    where
+        maire0_.commune_id=?
+```
+
+Pour une association @OneToOne bidirectionnelle,
+* non optionnelle `optional=false`
+* en `fetch=FetchType.LAZY`
+Lorsqu'on lit l'entité parente Commune, alors la relation se comporte comme une FetchType.EAGER !
+Et [EAGER n'est pas recommandé](https://vladmihalcea.com/eager-fetching-is-a-code-smell/)
+
+**Pourquoi ce comportement ?**
+Pour chaque entité dans le _persistent context_ Hibernate a besoin à la fois :
+* du type de l'entité persistante
+* et de son id
+Hibernate a besoin de connaître l'id de l'entité Maire.
+Donc ici, la seule façon de récupérer l'id de l'entité Maire est de faire ce deuxième select.
+
+La table maire a une colonne de clé primaire (id) et une colonne de clé étrangère (commune_id)
+Mais il ne peut y avoir qu'un seul maire associé à une commune.
+Une solution serait de :
+* définir commune_id comme à la fois clé primaire de la table maire et clé étrangère
+* faire correspondre cette clé maire.commune_id avec la clé primaire de la table commune
+
+Les colonnes de clés primaire ou de clés étrangères sont indexées. Utiliser la même colonne permet de mutualiser un seul index.
+
+Pour implémenter cette solution, il faut utiliser l'annotation MapsId. Cf Maire.java :
+```
+@Id
+private Long id;
+
+@OneToOne(fetch = FetchType.LAZY)
+@MapsId
+private Commune commune;
+```
+
+Le SQL de schema-generation est le suivant :
+```
+create sequence hibernate_sequence start 1 increment 1
+
+ create table commune (
+    id int8 not null,
+     nom varchar(40),
+     primary key (id)
+ )
+
+create table maire (
+   nom varchar(40),
+    commune_id int8 not null,
+    primary key (commune_id)
+)
+
+alter table if exists maire 
+   add constraint FKd9365plwnkta8k0i9vi48ea8y 
+   foreign key (commune_id) 
+   references commune
+```
+
+En bidirectionnel : ne fonctionne pas !
+
+TODO "And we can even fetch the PostDetails using the Post entity identifier, so there is no need for a bidirectional association:"
+et voir si un seul select...
 
 #### préconisation Baeldung
 

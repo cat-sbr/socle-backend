@@ -13,7 +13,7 @@ public class Commune implements Serializable {
     @Column(length=40)
     private String nom;
 
-    @OneToOne(mappedBy="commune", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy="commune", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
     private Maire maire;
 
     public Long getId() {

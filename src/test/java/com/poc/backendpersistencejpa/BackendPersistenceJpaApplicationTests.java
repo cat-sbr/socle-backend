@@ -35,6 +35,17 @@ class BackendPersistenceJpaApplicationTests {
 		entityManager.flush();
 		entityManager.clear();
 
+		/*
+		SELECTS
+		 */
+		Commune commune = entityManager.find(Commune.class, niort.getId());
+
+		/*
+		Maire maire = entityManager.find(
+				Maire.class,
+				niort.getId()
+		);
+		 */
 	}
 
 }
