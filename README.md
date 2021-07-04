@@ -1,5 +1,10 @@
 # socle-backend - JPA
 
+
+https://docs.oracle.com/cd/E16439_01/doc.1013/e13981/undejbs003.htm
+
+http://java.boot.by/scbcd5-guide/ch06.html
+
 https://www.baeldung.com/spring-data-jpa-generate-db-schema
 
 http://blog.paumard.org/cours/jpa/chap03-entite-relation.html
@@ -10,7 +15,43 @@ https://vladmihalcea.com/the-best-way-to-map-a-onetoone-relationship-with-jpa-an
 
 https://www.baeldung.com/jpa-cascade-types
 
-## Postgres
+https://www.baeldung.com/jpa-hibernate-persistence-context
+
+## Persistence context
+
+Un _persistence context_ est un ensemble d'instances correspondant à des enregistrements en base.
+Chaque instance est une instance de classe @Entity.
+Dans le _persistence context_ chaque instance d'entité a un état qui évolue dans un cycle de vie.
+
+Le _persistence context_ est le cache de premier niveau (L1) qui contient les entités mappées à des enregistrements en base.
+Le _persistence context_ assure un suivi de toutes les modifications qui ont lieu sur les entités.
+Lorsqu'une entité est modifiée (CRUD), la modification est persistée en base :
+* à la fin de la transaction
+* lors d'un flush
+
+Pourquoi un cache ? Si chaque CRUD sur une instance en JVM donnait lieu à la requête équivalente en base de données, alors ça génèrerait trop d'appels.
+Les performances seraient dégradées (les appels JDBC vers une base sont coûteux)
+
+## EntityManager
+
+Un EntityManager est associé à un _persistence context_. EntityManager est l'interface qui permet d'interagir avec le _persistence context_.
+C'est l'API de EntityManager qui permet de faire évoluer les entités dans le cycle de vie ou de requêter des entités.
+
+## Entity lifecycle
+
+![lifecycle_1](./doc/lifecycle_1.gif?raw=true)
+
+[source](http://java.boot.by/scbcd5-guide/ch06.html)
+
+<hr/>
+
+![lifecycle_2](./doc/lifecycle_2.gif?raw=true)
+
+[source](https://docs.oracle.com/cd/E16439_01/doc.1013/e13981/undejbs003.htm)
+
+<hr/>
+
+## Run Postgres
 
 Les diagrammes de tables sont générés avec pgAdmin ERD Tool.
 
@@ -24,7 +65,7 @@ C:\'Program Files'\PostgreSQL\13\bin\pg_ctl.exe -D 'C:\Program Files\PostgreSQL\
 docker-compose up
 ```
 
-## javax.persistence.schema-generation
+## Run UT javax.persistence.schema-generation
 
 [application.properties](./src/main/resources/application.properties) **javax.persistence.schema-generation.create-source** est valorisé à "metadata".
 Donc la génération du schéma est déterminée par les annotations sur les entités.
@@ -175,6 +216,10 @@ Hibernate:
         (?, ?, ?)
 ```
 
-#### préconisations relation 1:1
+#### préconisation vladmihalcea
 
-TODO : explorer https://vladmihalcea.com/the-best-way-to-map-a-onetoone-relationship-with-jpa-and-hibernate/ et tester des inserts...
+https://vladmihalcea.com/the-best-way-to-map-a-onetoone-relationship-with-jpa-and-hibernate/ et tester des inserts...
+
+#### préconisation Baeldung
+
+https://www.baeldung.com/jpa-one-to-one
