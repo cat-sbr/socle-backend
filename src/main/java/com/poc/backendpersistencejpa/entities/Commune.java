@@ -13,8 +13,10 @@ public class Commune implements Serializable {
     @Column(length=40)
     private String nom;
 
+    /*
     @OneToOne(mappedBy="commune", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
     private Maire maire;
+     */
 
     public Long getId() {
         return id;
@@ -32,6 +34,7 @@ public class Commune implements Serializable {
         this.nom = nom;
     }
 
+    /*
     public Maire getMaire() {
         return maire;
     }
@@ -39,4 +42,5 @@ public class Commune implements Serializable {
     public void setMaire(Maire maire) {
         this.maire = maire;
     }
+     */
 }

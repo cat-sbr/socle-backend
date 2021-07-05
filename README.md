@@ -263,6 +263,7 @@ Et [EAGER n'est pas recommandé](https://vladmihalcea.com/eager-fetching-is-a-co
 Pour chaque entité dans le _persistent context_ Hibernate a besoin à la fois :
 * du type de l'entité persistante
 * et de son id
+
 Hibernate a besoin de connaître l'id de l'entité Maire.
 Donc ici, la seule façon de récupérer l'id de l'entité Maire est de faire ce deuxième select.
 
@@ -306,10 +307,45 @@ alter table if exists maire
    references commune
 ```
 
-En bidirectionnel : ne fonctionne pas !
+![un-un-bidir-v1](./doc/un-un-bidir-v1.PNG?raw=true)
 
-TODO "And we can even fetch the PostDetails using the Post entity identifier, so there is no need for a bidirectional association:"
-et voir si un seul select...
+Mais lorsqu'on lit une Commune :
+```
+Commune commune = entityManager.find(Commune.class, niort.getId());
+```
+Hibernate déclenche encore 2 select !
+```
+    select
+        commune0_.id as id1_0_0_,
+        commune0_.nom as nom2_0_0_ 
+    from
+        commune commune0_ 
+    where
+        commune0_.id=?
+
+    select
+        maire0_.commune_id as commune_2_1_0_,
+        maire0_.nom as nom1_1_0_ 
+    from
+        maire maire0_ 
+    where
+        maire0_.commune_id=?
+```
+
+Vlad Mihalcea écrit : "And we can even fetch the PostDetails using the Post entity identifier, so there is no need for a bidirectional association"
+Donc on supprime la réfère à Maire dans Commune...
+
+Le même schéma est généré.
+
+Lorsqu'on requête une Commune, évidemment Hibernate ne fait qu'un seul select.
+
+On peut ensuite requêter son maire avec :
+```
+Maire maire = entityManager.find(
+		Maire.class,
+		niort.getId()
+);
+```
 
 #### préconisation Baeldung
 

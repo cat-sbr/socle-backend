@@ -29,7 +29,7 @@ class BackendPersistenceJpaApplicationTests {
 		niort.setNom("Niort");
 		Maire pierre = new Maire();
 		pierre.setNom("Pierre");
-		niort.setMaire(pierre);
+		//niort.setMaire(pierre);
 		pierre.setCommune(niort);
 		entityManager.persist(niort);
 		entityManager.flush();
@@ -40,12 +40,10 @@ class BackendPersistenceJpaApplicationTests {
 		 */
 		Commune commune = entityManager.find(Commune.class, niort.getId());
 
-		/*
 		Maire maire = entityManager.find(
 				Maire.class,
 				niort.getId()
 		);
-		 */
 	}
 
 }
