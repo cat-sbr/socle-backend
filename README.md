@@ -387,4 +387,8 @@ Mais en supprimant la référence à Maire dans Commune, on se prive de l'attrib
 
 ### préconisation Baeldung
 
-https://www.baeldung.com/jpa-one-to-one
+En complément de ce qu'on a vu jusque là, Baledung propose une solution 
+lorsqu'on implémente une relation optionnelle
+lorsqu'on ne veut pas de valeur _null_
+
+[https://www.baeldung.com/jpa-one-to-one#jt-model](https://www.baeldung.com/jpa-one-to-one#jt-model)
