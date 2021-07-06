@@ -27,11 +27,14 @@ class BackendPersistenceJpaApplicationTests {
 		 */
 		Commune niort = new Commune();
 		niort.setNom("Niort");
+		//niort.setMaire(pierre);
+		entityManager.persist(niort);
+
 		Maire pierre = new Maire();
 		pierre.setNom("Pierre");
-		//niort.setMaire(pierre);
 		pierre.setCommune(niort);
-		entityManager.persist(niort);
+		entityManager.persist(pierre);
+
 		entityManager.flush();
 		entityManager.clear();
 
@@ -40,10 +43,18 @@ class BackendPersistenceJpaApplicationTests {
 		 */
 		Commune commune = entityManager.find(Commune.class, niort.getId());
 
-		Maire maire = entityManager.find(
+		/*
+		Modifier le maire de Niort
+		 */
+		Maire maireDeNiort = entityManager.find(
 				Maire.class,
 				niort.getId()
 		);
+		maireDeNiort.setNom("Paul");
+		entityManager.persist(maireDeNiort);
+		entityManager.flush();
+		entityManager.clear();
+
 	}
 
 }

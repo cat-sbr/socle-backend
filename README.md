@@ -51,6 +51,8 @@ C'est l'API de EntityManager qui permet de faire évoluer les entités dans le c
 
 <hr/>
 
+[http://blog.paumard.org/cours/jpa/chap03-entite-operations.html](http://blog.paumard.org/cours/jpa/chap03-entite-operations.html)
+
 ## Run Postgres
 
 Les diagrammes de tables sont générés avec pgAdmin ERD Tool.
@@ -70,14 +72,46 @@ docker-compose up
 [application.properties](./src/main/resources/application.properties) **javax.persistence.schema-generation.create-source** est valorisé à "metadata".
 Donc la génération du schéma est déterminée par les annotations sur les entités.
 
+## Direction d'une relation
+
+La direction d'une relation est définie lors de la conception du MCD. Si on considère par exemple un client et ses commandes :
+* Un client peut être défini alors qu'il n'a pas encore passé de commande.
+* Au contraire une commande n'est pas définie sans le client associé
+* On peut supprimer une commande sans nécessairement supprimer le client associé
+* Au contraire, si on supprime un client alors ses commandes seront "orphelines" et il faudra les supprimer
+Donc une commande doit faire référence à un client.
+En base, la table commande contient un champ qui porte la relation de clé étrangère avec la table client : commande.client_id.
+  
+Dans le cas d'une commune et d'un maire, on convient ici que c'est la table maire qui fait référence à la table commune, avec un champ maire.commune_id.
+
+### "parent, enfant"
+
 En termes POO, une relation parent-enfant est équivalente à une composition : l'entité enfant ne peut pas exister sans l'entité parent.
 Une commune peut exister sans un maire, mais un maire ne peut pas exister sans une commune.
+
+(Un maire en tant que personne peut exister sans sa commune, mais fonctionnellement un maire est défini relativement à une commune)
+
 Donc Maire est l'entité enfant, Commune est l'entité parent.
 On va inverser la relation Maire/Commune de cet article [http://blog.paumard.org/cours/jpa/chap03-entite-relation.html](http://blog.paumard.org/cours/jpa/chap03-entite-relation.html)
 
-### Relation 1:1
+### "inverse, owning side"
 
-#### Cas unidirectionnel - [branche des sources](https://github.com/cat-sbr/socle-backend/tree/un-un--unidir)
+La clé étrangère qui représente la relation est dans la table maire : maire.commune_id. 
+Donc Maire est le _owning side_ de la relation Maire Commune.
+("the owning side is the entity that has the reference to the other")
+
+Côté Entités JPA, si on définit une relation bidirectionnelle, l'attribut `mappedBy` indique que l'entité est du côté _inverse_ de la relation
+
+La classe Commune peut avoir un attribut Maire, annoté ainsi :
+```
+@OneToOne(mappedBy="commune")
+private Maire maire;
+```
+Commune est le _inverse side_ de la relation Maire Commune.
+
+## Relation 1:1
+
+### Cas unidirectionnel - [branche des sources](https://github.com/cat-sbr/socle-backend/tree/un-un--unidir)
 
 Le SQL de schema-generation est :
 ```
@@ -122,7 +156,7 @@ DETAIL:  Key (commune_id)=(1) already exists.
 SQL state: 23505
 ```
 
-#### Cas bidirectionnel - [branche des sources](https://github.com/cat-sbr/socle-backend/tree/OneToOne_bidirectionnel)
+### Cas bidirectionnel - [branche des sources](https://github.com/cat-sbr/socle-backend/tree/OneToOne_bidirectionnel)
 
 Ajouter une référence à l'entité Maire dans la classe Commune **ne change rien au SQL généré**
 ```
@@ -133,7 +167,7 @@ private Maire maire;
 Une relation bidirectionnelle ne crée pas une colonne dans la table parent (commune) vers la table enfant (maire). 
 Lorsque l'on veut lire la relation retour, à partir de l'entité parent (Commune), une requête est lancée sur la base, en utilisant le caractère bidirectionnel de la relation.
 
-#### fetch - [branches des sources](https://github.com/cat-sbr/socle-backend/tree/OneToOne_bidirectionnel_fetch)
+### fetch - [branches des sources](https://github.com/cat-sbr/socle-backend/tree/OneToOne_bidirectionnel_fetch)
 
 * FetchType.LAZY : indique que la relation doit être chargée à la demande ; 
 * FetchType.EAGER : indique que la relation doit être chargée en même temps que l'entité qui la porte.
@@ -176,7 +210,7 @@ On obtient ce select :
         maire0_.id=?
 ```
 
-#### cascade - [branches des sources](https://github.com/cat-sbr/socle-backend/tree/OneToOne_bidirectionnel_cascade)
+### cascade - [branches des sources](https://github.com/cat-sbr/socle-backend/tree/OneToOne_bidirectionnel_cascade)
 
 Le entityManager permet d'effectuer les opération suivantes sur une entité : DETACH, MERGE, PERSIST, REMOVE, REFRESH.
 Le comportement cascade consiste à spécifier ce qui se passe pour une entité (Maire) en relation avec une entité parent (Commune),
@@ -216,7 +250,7 @@ Hibernate:
         (?, ?, ?)
 ```
 
-#### préconisation vladmihalcea
+### préconisation vladmihalcea - [branches des sources](https://github.com/cat-sbr/socle-backend/tree/OneToOne_vladmihalcea)
 
 [https://vladmihalcea.com/the-best-way-to-map-a-onetoone-relationship-with-jpa-and-hibernate/](https://vladmihalcea.com/the-best-way-to-map-a-onetoone-relationship-with-jpa-and-hibernate/)
 
@@ -270,8 +304,12 @@ Donc ici, la seule façon de récupérer l'id de l'entité Maire est de faire ce
 La table maire a une colonne de clé primaire (id) et une colonne de clé étrangère (commune_id)
 Mais il ne peut y avoir qu'un seul maire associé à une commune.
 Une solution serait de :
-* définir commune_id comme à la fois clé primaire de la table maire et clé étrangère
+* définir commune_id à la fois comme clé primaire de la table maire et comme clé étrangère
 * faire correspondre cette clé maire.commune_id avec la clé primaire de la table commune
+
+Autrement dit pour chaque association Commune Maire, le Maire et la Commune partagent la même clé primaire :
+* commune.id
+* maire.commune_id
 
 Les colonnes de clés primaire ou de clés étrangères sont indexées. Utiliser la même colonne permet de mutualiser un seul index.
 
@@ -332,10 +370,8 @@ Hibernate déclenche encore 2 select !
         maire0_.commune_id=?
 ```
 
-Vlad Mihalcea écrit : "And we can even fetch the PostDetails using the Post entity identifier, so there is no need for a bidirectional association"
-Donc on supprime la réfère à Maire dans Commune...
-
-Le même schéma est généré.
+On peut même récupérer un Maire en utilisant l'id de sa Commune, donc on n'a plus besoin d'une relation bidirectionnelle.
+Donc on supprime la réfèrence à Maire dans Commune. Le même schéma est généré.
 
 Lorsqu'on requête une Commune, évidemment Hibernate ne fait qu'un seul select.
 
@@ -347,6 +383,8 @@ Maire maire = entityManager.find(
 );
 ```
 
-#### préconisation Baeldung
+Mais en supprimant la référence à Maire dans Commune, on se prive de l'attribut `cascade`. On ne peut plus mettre à jour le Maire d'une Commune en manipulant uniquement l'entité Commune.
+
+### préconisation Baeldung
 
 https://www.baeldung.com/jpa-one-to-one
