@@ -26,14 +26,14 @@ class BackendPersistenceJpaApplicationTests {
 		INSERTS
 		 */
 		Commune niort = new Commune();
-		niort.setNom("Niort");
-		//niort.setMaire(pierre);
-		entityManager.persist(niort);
+		niort.setNomCommune("Niort");
 
-		Maire pierre = new Maire();
-		pierre.setNom("Pierre");
-		pierre.setCommune(niort);
-		entityManager.persist(pierre);
+		Maire juste = new Maire();
+		juste.setNom("Leblanc");
+		juste.setPrenom("Juste");
+		niort.setMaire(juste);
+
+		entityManager.persist(niort);
 
 		entityManager.flush();
 		entityManager.clear();
@@ -42,18 +42,6 @@ class BackendPersistenceJpaApplicationTests {
 		SELECTS
 		 */
 		Commune commune = entityManager.find(Commune.class, niort.getId());
-
-		/*
-		Modifier le maire de Niort
-		 */
-		Maire maireDeNiort = entityManager.find(
-				Maire.class,
-				niort.getId()
-		);
-		maireDeNiort.setNom("Paul");
-		entityManager.persist(maireDeNiort);
-		entityManager.flush();
-		entityManager.clear();
 
 	}
 

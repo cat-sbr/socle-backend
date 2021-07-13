@@ -11,12 +11,10 @@ public class Commune implements Serializable {
     private Long id;
 
     @Column(length=40)
-    private String nom;
+    private String nomCommune;
 
-    /*
-    @OneToOne(mappedBy="commune", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+    @Embedded
     private Maire maire;
-     */
 
     public Long getId() {
         return id;
@@ -26,15 +24,14 @@ public class Commune implements Serializable {
         this.id = id;
     }
 
-    public String getNom() {
-        return nom;
+    public String getNomCommune() {
+        return nomCommune;
     }
 
-    public void setNom(String nom) {
-        this.nom = nom;
+    public void setNomCommune(String nomCommune) {
+        this.nomCommune = nomCommune;
     }
 
-    /*
     public Maire getMaire() {
         return maire;
     }
@@ -42,5 +39,4 @@ public class Commune implements Serializable {
     public void setMaire(Maire maire) {
         this.maire = maire;
     }
-     */
 }

@@ -392,3 +392,24 @@ lorsqu'on implémente une relation optionnelle
 lorsqu'on ne veut pas de valeur _null_
 
 [https://www.baeldung.com/jpa-one-to-one#jt-model](https://www.baeldung.com/jpa-one-to-one#jt-model)
+
+### EmbeddedId
+
+[https://thorben-janssen.com/hibernate-tip-bidirectional-one-to-one-with-shared-composite-primary-key/](https://thorben-janssen.com/hibernate-tip-bidirectional-one-to-one-with-shared-composite-primary-key/)
+
+## Objet inclus
+
+Une entreprise a un contact. Le cycle de vie de l'entité ContactPerson est déterminé par l'entite Entreprise.
+
+On peut transposer cette logique avec Commune et Maire. Une commune a un maire. L'entité Maire ne peut pas exister sans l'entité Commune.
+
+On dit que Commune est l'entité maître.
+
+**attention** cela implique que l'appli n'aura jamais besoin de manipuler (CRUD) des entités Maire, en dehors de leurs Communes...
+
+[http://blog.paumard.org/cours/jpa/chap03-entite-objets-inclus.html](http://blog.paumard.org/cours/jpa/chap03-entite-objets-inclus.html)
+[https://www.baeldung.com/jpa-embedded-embeddable](https://www.baeldung.com/jpa-embedded-embeddable)
+
+![embedded_entity](./doc/embedded_entity.PNG?raw=true)
+
+Et les insert, select, sont très classiques (une seule table)
